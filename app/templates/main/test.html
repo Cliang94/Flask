@@ -1,0 +1,85 @@
+{% extends 'common/base.html' %}
+
+
+{% block title %}详情页{% endblock %}
+
+{% from 'common/macro.html' import show_pagiantion %}
+
+
+
+{% block page_content %}
+    <div class="form-group">
+        <label for="username">用户名</label>
+        <input class="form-control" id="username" value="{{ posts_user.user.username }}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="Email">内容</label>
+        <input type="email" class="form-control" id="Email" value="{{ posts_user.content }}" readonly>
+    </div>
+
+
+
+
+    <div>
+
+        {{ quick_form(form) }}
+        {% for p in posts %}
+            <div class="media">
+                <div class="media-left">
+                    <a href="{{ url_for('main.index',uip=p.user.id) }}">
+                        <img class="media-object" width="64"
+                             src="{{ url_for('static', filename='upload/'+p.user.icon) }}"
+                             alt="icon">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <div style="float: right;">{{ moment(p.timestamp).fromNow() }}</div>
+                    <a href="{{ url_for('main.index',uip=p.user.id) }}">
+                        <h4 class="media-heading">{{ p.user.username }}</h4>
+                    </a>
+                    <a href="{{ url_for('main.ss_show',pip=p.id) }}">
+                        {{ p.content }}
+                    </a>
+                    <div class="collect" url="{{ url_for('posts.collect',pid=p.id) }}" style="cursor: pointer">
+                        {%- if current_user.is_authenticated and current_user.is_favorite(pid=p.id) -%}
+                            取消收藏
+                        {%- else -%}
+                            添加收藏
+                        {%- endif -%}
+
+
+                    </div>
+
+                </div>
+            </div>
+        {% endfor %}
+        {{ show_pagiantion(pagination,'main.index',uip=uip) }}
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(function () {
+            $('.collect').click(function () {
+                {% if current_user.is_authenticated %}
+                    _this = this
+
+
+                    $.get($(_this).attr('url'), function (data) {
+                        $(_this).text(data.status)
+                    })
+                {% else %}
+                    location.href = "{{ url_for('user.login') }}"
+                {% endif %}
+            })
+
+        })
+
+
+    </script>
+
+{% endblock %}
+
+
